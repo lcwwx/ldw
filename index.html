@@ -1,0 +1,228 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>三小时 · 最后一份牛肉汉堡</title>
+
+<meta name="description" content="雷德舰队降临地球还剩三小时。大四学生林默只想在食堂三楼，吃一个张阿姨做的牛肉汉堡。一部关于末日、执念与一碗人间烟火的文字冒险游戏，三个结局。">
+<meta name="author" content="许伟 · 吴小龙">
+<meta name="theme-color" content="#0a0c10">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="三小时">
+<meta property="og:title" content="三小时 · 最后一份牛肉汉堡">
+<meta property="og:description" content="人类还有三小时。我想先吃个汉堡。">
+<meta property="og:image" content="og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="og.png">
+<meta name="twitter:title" content="三小时 · 最后一份牛肉汉堡">
+<meta name="twitter:description" content="人类还有三小时。我想先吃个汉堡。">
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='13' fill='%230a0c10'/%3E%3Crect x='14' y='40' width='36' height='5' rx='2.5' fill='%23f2b96c' opacity='.55'/%3E%3Ccircle cx='32' cy='28' r='12' fill='%23f2b96c'/%3E%3C/svg%3E">
+
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<noscript>
+  <div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0a0c10;color:#e8e4dc;font-family:serif;font-size:16px;letter-spacing:.1em;text-align:center;line-height:2;z-index:999">
+    这个游戏需要 JavaScript 才能运行，<br>请在浏览器设置中允许脚本后刷新页面。
+  </div>
+</noscript>
+
+<div id="fadeBlack"></div>
+
+<!-- ============ 舞台 ============ -->
+<div id="stage">
+  <div id="sceneBg"></div>
+  <div id="sceneLayer"></div>
+  <div id="lightLayer"></div>
+  <canvas id="fxCanvas"></canvas>
+  <div id="vignette"></div>
+  <div id="grain"></div>
+  <div id="flash"></div>
+
+  <!-- 顶部信息 -->
+  <header id="hud">
+    <div class="hud-left">
+      <div id="chapterTag">序章 · 铅灰色</div>
+    </div>
+    <div class="hud-center">
+      <div id="clock">
+        <span class="clock-label">降临倒计时</span>
+        <span id="clockValue">03:00:00</span>
+      </div>
+    </div>
+    <div class="hud-right">
+      <div class="stat" title="执念：你对自己想要的东西有多认真">
+        <span class="stat-name">执念</span>
+        <div class="bar"><i id="barChi"></i></div>
+      </div>
+      <div class="stat" title="牵挂：你对别人有多放不下">
+        <span class="stat-name">牵挂</span>
+        <div class="bar"><i id="barQian"></i></div>
+      </div>
+      <button id="btnMenu" class="ghost-btn" title="菜单 (Esc)">☰</button>
+    </div>
+  </header>
+
+  <!-- 对白 -->
+  <div id="dialogueWrap">
+    <div id="dialogue">
+      <div id="nameplate"><span id="speaker"></span></div>
+      <div id="textBox"><div id="text"></div><span id="caret"></span></div>
+      <div id="nextHint">▼</div>
+    </div>
+    <div id="choices"></div>
+  </div>
+</div>
+
+<!-- ============ 标题 ============ -->
+<div id="titleScreen" class="overlay show">
+  <div class="title-bg"></div>
+  <div class="title-inner">
+    <div class="title-kicker">末日 · 校园 · 三小时</div>
+    <h1 class="title-main">三小时</h1>
+    <div class="title-sub">最后一份牛肉汉堡</div>
+    <div class="title-line"></div>
+    <div class="title-quote">“人类还有三小时。我想先吃个汉堡。”</div>
+    <nav class="title-menu">
+      <button id="btnStart" class="menu-btn">开 始 游 戏</button>
+      <button id="btnContinue" class="menu-btn" disabled>继 续 游 戏</button>
+      <button id="btnGallery" class="menu-btn">结 局 图 鉴</button>
+      <button id="btnHelp" class="menu-btn">玩 法 说 明</button>
+    </nav>
+    <div class="title-foot">方向：点击 / 空格推进　·　1~4 选择　·　Esc 菜单<br><span>改编自《实验8 与AI的交互记录》</span></div>
+  </div>
+</div>
+
+<!-- ============ 章节卡 ============ -->
+<div id="chapterCard" class="overlay">
+  <div class="chapter-inner">
+    <div class="chapter-num"></div>
+    <div class="chapter-bar"></div>
+    <div class="chapter-title"></div>
+    <div class="chapter-sub"></div>
+  </div>
+</div>
+
+<!-- ============ 结局 ============ -->
+<div id="endingScreen" class="overlay">
+  <div class="ending-bg" id="endingBg"></div>
+  <div class="ending-inner">
+    <div class="ending-kicker">结局</div>
+    <div class="ending-no"></div>
+    <h2 class="ending-title"></h2>
+    <div class="ending-quote"></div>
+    <div class="ending-stats"></div>
+    <div class="ending-btns">
+      <button class="menu-btn" id="btnEndGallery">结局图鉴</button>
+      <button class="menu-btn" id="btnEndAgain">回到标题</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 图鉴 ============ -->
+<div id="galleryScreen" class="overlay panel-overlay">
+  <div class="panel">
+    <div class="panel-head">
+      <h3>结局图鉴</h3>
+      <button class="ghost-btn close-panel" data-close="galleryScreen">✕</button>
+    </div>
+    <div class="panel-body" id="galleryBody"></div>
+  </div>
+</div>
+
+<!-- ============ 回顾 ============ -->
+<div id="logScreen" class="overlay panel-overlay">
+  <div class="panel">
+    <div class="panel-head">
+      <h3>回顾</h3>
+      <button class="ghost-btn close-panel" data-close="logScreen">✕</button>
+    </div>
+    <div class="panel-body" id="logBody"></div>
+  </div>
+</div>
+
+<!-- ============ 菜单 ============ -->
+<div id="menuScreen" class="overlay panel-overlay">
+  <div class="panel narrow">
+    <div class="panel-head">
+      <h3>菜单</h3>
+      <button class="ghost-btn close-panel" data-close="menuScreen">✕</button>
+    </div>
+    <div class="panel-body menu-list">
+      <button class="menu-btn" data-act="resume">继续游戏</button>
+      <button class="menu-btn" data-act="log">回顾</button>
+      <button class="menu-btn" data-act="settings">设置</button>
+      <button class="menu-btn" data-act="gallery">结局图鉴</button>
+      <button class="menu-btn danger" data-act="restart">重新开始</button>
+      <button class="menu-btn" data-act="title">回到标题</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 设置 ============ -->
+<div id="settingsScreen" class="overlay panel-overlay">
+  <div class="panel narrow">
+    <div class="panel-head">
+      <h3>设置</h3>
+      <button class="ghost-btn close-panel" data-close="settingsScreen">✕</button>
+    </div>
+    <div class="panel-body settings-list">
+      <label class="setting-row">
+        <span>文字速度</span>
+        <span class="seg" id="segSpeed">
+          <button data-v="slow">慢</button>
+          <button data-v="mid">中</button>
+          <button data-v="fast">快</button>
+          <button data-v="instant">瞬间</button>
+        </span>
+      </label>
+      <label class="setting-row">
+        <span>音量</span>
+        <input type="range" id="volRange" min="0" max="100" value="55">
+      </label>
+      <label class="setting-row">
+        <span>画面特效<br><small>（粒子 / 晃动 / 闪白）</small></span>
+        <span class="seg" id="segFx">
+          <button data-v="on">开</button>
+          <button data-v="off">关</button>
+        </span>
+      </label>
+      <label class="setting-row">
+        <span>自动播放</span>
+        <span class="seg" id="segAuto">
+          <button data-v="on">开</button>
+          <button data-v="off">关</button>
+        </span>
+      </label>
+      <div class="settings-note">存档会自动保存，关闭网页也不会丢失。全部数据只存放在你自己的电脑上。</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 帮助 ============ -->
+<div id="helpScreen" class="overlay panel-overlay">
+  <div class="panel">
+    <div class="panel-head">
+      <h3>玩法说明</h3>
+      <button class="ghost-btn close-panel" data-close="helpScreen">✕</button>
+    </div>
+    <div class="panel-body help-body">
+      <p><b>这是一个什么游戏</b><br>文字冒险（视觉小说）。外星文明「雷德」距离降临地球还有三小时，你扮演大四学生林默，在崩溃的校园里走完这三小时。</p>
+      <p><b>怎么玩</b><br>点击画面或按空格 / 回车推进对白；出现选项时点选项，或直接按数字键 1~4。按 Esc 打开菜单，可以回顾、调设置、看结局图鉴。</p>
+      <p><b>两个隐藏数值</b><br><b>执念</b>：你有多认真地对待自己想要的东西。<br><b>牵挂</b>：你有多放不下别人。<br>它们不决定你能不能活下去，只决定你在最后一刻说得出什么话。</p>
+      <p><b>倒计时</b><br>时间只在你做选择时流动。走得越快，你能撞见的东西越多。</p>
+      <p><b>三个结局，六张卡</b><br>第三章的最后一次选择会通向三条不同的路。同一条路，也会因为你的执念与牵挂而有「残缺」与「完整」两种收场。</p>
+      <p class="dim">游戏不含任何需要联网的内容，所有画面均由代码绘制。</p>
+    </div>
+  </div>
+</div>
+
+<script src="js/art.js"></script>
+<script src="js/story.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/engine.js"></script>
+</body>
+</html>
+
